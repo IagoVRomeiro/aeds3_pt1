@@ -12,21 +12,22 @@ public class ImportadorCSV {
             String linha;
             
             while ((linha = br.readLine()) != null) {
+
+
                 if (linha.trim().isEmpty()) {
                     continue;
                 }
-                String[] infos = linha.split(",");
-                
-                for (int i = 0; i < infos.length; i++) {
-                    infos[i] = infos[i].replace("\"", "").trim();
-                }
 
                 
-                int numeroCapitulo = Integer.parseInt(infos[0]);
-                String volume = infos[1];
+                String[] infos = linha.split(",");
+            
+
+                
+                Short numeroCapitulo = Short.parseShort(infos[0]);
+                Short volume = Short.parseShort(infos[1]);
                 String nome = infos[2];
                 String[] titulos = {infos[3], infos[4]};
-                String paginas = infos[5];
+                Short paginas = Short.parseShort(infos[5]);
                 String data = infos[6];
                 String episodio = infos[7];
 

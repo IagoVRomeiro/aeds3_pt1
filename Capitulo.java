@@ -2,15 +2,15 @@ import java.io.*;
 
 class Capitulo {
     
-    protected int NumeroCapitulo;
-    protected String Volume;
+    protected Short NumeroCapitulo;
+    protected Short Volume;
     protected String Nome;
     protected String[] Titulos; // Vetor para TituloOriginal e TituloIngles
-    protected String Paginas;
+    protected Short Paginas;
     protected String Data;
     protected String Episodio;
 
-    public Capitulo(int a, String b, String c, String[] d, String e, String f, String g) {
+    public Capitulo(Short a, Short b, String c, String[] d, Short e, String f, String g) {
         NumeroCapitulo = a;
         Volume = b;
         Nome = c;  
@@ -22,10 +22,10 @@ class Capitulo {
 
     public Capitulo() {
         NumeroCapitulo = -1;
-        Volume = "";
+        Volume = -1;
         Nome = "";  
         Titulos = new String[]{"", ""};
-        Paginas = "";
+        Paginas = -1;
         Data = "";
         Episodio = "";
     }
@@ -46,12 +46,12 @@ class Capitulo {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
         
-        dos.writeInt(NumeroCapitulo);
-        dos.writeUTF(Volume);
+        dos.writeShort(NumeroCapitulo);
+        dos.writeShort(Volume);
         dos.writeUTF(Nome);
         dos.writeUTF(Titulos[0]);
         dos.writeUTF(Titulos[1]);
-        dos.writeUTF(Paginas);
+        dos.writeShort(Paginas);
         dos.writeUTF(Data);
         dos.writeUTF(Episodio);
         
@@ -62,11 +62,11 @@ class Capitulo {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
     
-        int NumeroCapitulo = dis.readInt();
-        String Volume = dis.readUTF();
+        Short NumeroCapitulo = dis.readShort();
+        Short Volume = dis.readShort();
         String Nome = dis.readUTF();
         String[] Titulos = {dis.readUTF(), dis.readUTF()};
-        String Paginas = dis.readUTF();
+        Short Paginas = dis.readShort();
         String Data = dis.readUTF();
         String Episodio = dis.readUTF();
     
@@ -77,7 +77,7 @@ class Capitulo {
         return NumeroCapitulo;
     }
 
-    public String getVolume() {
+    public Short getVolume() {
         return Volume;
     }
 
@@ -89,7 +89,7 @@ class Capitulo {
         return Titulos;
     }
 
-    public String getPaginas() {
+    public Short getPaginas() {
         return Paginas;
     }
 
@@ -102,11 +102,11 @@ class Capitulo {
     }
 
     // Setters
-    public void setNumeroCapitulo(int numeroCapitulo) {
+    public void setNumeroCapitulo(Short numeroCapitulo) {
         this.NumeroCapitulo = numeroCapitulo;
     }
 
-    public void setVolume(String volume) {
+    public void setVolume(Short volume) {
         this.Volume = volume;
     }
 
@@ -122,7 +122,7 @@ class Capitulo {
         this.Titulos[1] = titulosIngles;
     }
 
-    public void setPaginas(String paginas) {
+    public void setPaginas(Short paginas) {
         this.Paginas = paginas;
     }
 
