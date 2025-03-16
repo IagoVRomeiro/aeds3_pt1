@@ -14,9 +14,9 @@ class Capitulo {
     public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) {
         this.numCapitulo = numCapitulo;
         this.volume = volume;
-        this.nome = nome;  
+        this.nome = nome; 
+        this.qtdString = titulos.length; 
         this.titulos = titulos;
-        this.qtdString = titulos.length;
         this.paginas = paginas;
         this.data = data;
         this.episodio = episodio;
@@ -47,20 +47,36 @@ class Capitulo {
     }
 
     public byte[] toByteArray() throws IOException {
+        // Cria o fluxo para escrever os dados binários
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
-        
-        dos.writeInt(numCapitulo);
-        dos.writeInt(volume);
-        dos.writeUTF(nome);
-        dos.writeInt(qtdString);
+
+        // Escreve a Lápide (1 byte) - 1 para válido, 0 para excluído
+        dos.writeByte(1);
+
+        // Prepara o vetor de bytes dos dados (dados do registro)
+        ByteArrayOutputStream recordStream = new ByteArrayOutputStream();
+        DataOutputStream recordDos = new DataOutputStream(recordStream);
+
+        // Escreve os dados do registro
+        recordDos.writeInt(numCapitulo);
+        recordDos.writeInt(volume);
+        recordDos.writeUTF(nome);
+        recordDos.writeInt(qtdString);
         for (String titulo : titulos) {
-            dos.writeUTF(titulo);
+            recordDos.writeUTF(titulo);
         }
-        dos.writeInt(paginas);
-        dos.writeUTF(data);
-        dos.writeUTF(episodio);
-        
+        recordDos.writeInt(paginas);
+        recordDos.writeUTF(data);
+        recordDos.writeUTF(episodio);
+
+        // Grava o tamanho do vetor de bytes (indicador de tamanho do registro)
+        byte[] recordBytes = recordStream.toByteArray();
+        dos.writeInt(recordBytes.length); // Tamanho do vetor de bytes
+
+        // Grava o vetor de bytes do registro
+        dos.write(recordBytes);
+
         return baos.toByteArray();
     }
     
