@@ -5,7 +5,7 @@ public class Main {
 
     public static void main(String[] args) throws ParseException, IOException {
         ImportadorCSV.importarCSVParaBinario();
-        Menu.menu();
+       // Menu.menu();
     }
 
 }

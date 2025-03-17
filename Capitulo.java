@@ -1,7 +1,8 @@
+
 import java.io.*;
 
 class Capitulo {
-    
+
     protected int numCapitulo;
     protected int volume;
     protected String nome;
@@ -11,11 +12,11 @@ class Capitulo {
     protected String data;
     protected String episodio;
 
-    public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) {
+    public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) {;
         this.numCapitulo = numCapitulo;
         this.volume = volume;
-        this.nome = nome; 
-        this.qtdString = titulos.length; 
+        this.nome = nome;
+        this.qtdString = titulos.length;
         this.titulos = titulos;
         this.paginas = paginas;
         this.data = data;
@@ -25,7 +26,7 @@ class Capitulo {
     public Capitulo() {
         this.numCapitulo = -1;
         this.volume = -1;
-        this.nome = "";  
+        this.nome = "";
         this.titulos = new String[]{"", ""};
         this.qtdString = titulos.length;
         this.paginas = -1;
@@ -35,55 +36,47 @@ class Capitulo {
 
     @Override
     public String toString() {
-        return "NumeroCapitulo: " + numCapitulo +
-               ", Volume: " + volume +
-               ", Nome: " + nome +  
-               ", TituloOriginal: " + titulos[0] +
-               ", TituloIngles: " + titulos[1] +
-               ", QtdString: " + qtdString +
-               ", Paginas: " + paginas +
-               ", Data: " + data +
-               ", Episodio: " + episodio;
+        return "NumeroCapitulo: " + numCapitulo
+                + ", Volume: " + volume
+                + ", Nome: " + nome
+                + ", TituloOriginal: " + titulos[0]
+                + ", TituloIngles: " + titulos[1]
+                + ", QtdString: " + qtdString
+                + ", Paginas: " + paginas
+                + ", Data: " + data
+                + ", Episodio: " + episodio;
     }
 
     public byte[] toByteArray() throws IOException {
-        // Cria o fluxo para escrever os dados binários
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
 
-        // Escreve a Lápide (1 byte) - 1 para válido, 0 para excluído
-        dos.writeByte(1);
-
-        // Prepara o vetor de bytes dos dados (dados do registro)
-        ByteArrayOutputStream recordStream = new ByteArrayOutputStream();
-        DataOutputStream recordDos = new DataOutputStream(recordStream);
-
         // Escreve os dados do registro
-        recordDos.writeInt(numCapitulo);
-        recordDos.writeInt(volume);
-        recordDos.writeUTF(nome);
-        recordDos.writeInt(qtdString);
+        dos.writeInt(numCapitulo);
+        dos.writeInt(volume);
+        dos.writeUTF(nome);
+        dos.writeInt(qtdString);
         for (String titulo : titulos) {
-            recordDos.writeUTF(titulo);
+            dos.writeUTF(titulo);
         }
-        recordDos.writeInt(paginas);
-        recordDos.writeUTF(data);
-        recordDos.writeUTF(episodio);
-
-        // Grava o tamanho do vetor de bytes (indicador de tamanho do registro)
-        byte[] recordBytes = recordStream.toByteArray();
-        dos.writeInt(recordBytes.length); // Tamanho do vetor de bytes
-
-        // Grava o vetor de bytes do registro
-        dos.write(recordBytes);
+        dos.writeInt(paginas);
+        dos.writeUTF(data);
+        dos.writeUTF(episodio);
 
         return baos.toByteArray();
     }
-    
+
     public static Capitulo fromByteArray(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
-    
+
+        byte valido = dis.readByte();
+        int tamanhoVetor = dis.readInt();
+
+        if (valido == 1) {
+            MyIO.println("Tamanho do Vetor" + tamanhoVetor);
+        }
         int numCapitulo = dis.readInt();
         int volume = dis.readInt();
         String nome = dis.readUTF();
@@ -95,8 +88,9 @@ class Capitulo {
         int paginas = dis.readInt();
         String dataStr = dis.readUTF();
         String episodio = dis.readUTF();
-    
+
         return new Capitulo(numCapitulo, volume, nome, titulos, paginas, dataStr, episodio);
+
     }
 
     public int getNumCapitulo() {

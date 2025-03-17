@@ -1,4 +1,3 @@
-
 import java.io.*;
 
 public class ImportadorCSV {
@@ -14,10 +13,8 @@ public class ImportadorCSV {
             while ((linha = br.readLine()) != null) {
              
 
-                // Usando a função de formatação para processar a linha
                 String[] campos = AuxFuncoes.separarPorVirgula(linha);
 
-      
                 int numeroCapitulo = Integer.parseInt(campos[0]);
                 int volume = Integer.parseInt(campos[1]);
                 String nome = campos[2];
@@ -25,10 +22,15 @@ public class ImportadorCSV {
                 int paginas = Integer.parseInt(campos[5]);
                 String data = AuxFuncoes.formatarData(campos[6]);
                 String episodio = campos[7];
-
-
+                
                 Capitulo capitulo = new Capitulo(numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
                 byte[] dataBytes = capitulo.toByteArray();
+                
+ 
+                fos.write(1);
+
+                fos.write(dataBytes.length);
+
                 fos.write(dataBytes);
 
             }
