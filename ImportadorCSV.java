@@ -1,18 +1,18 @@
 import java.io.*;
 
 public class ImportadorCSV {
-
     public static void importarCSVParaBinario() throws IOException {
         String csv = "dataset/capitulos.csv";
         String binario = "dataset/capitulos.db";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csv)); FileOutputStream fos = new FileOutputStream(binario)) {
-
+      
+            BufferedReader br = new BufferedReader(new FileReader(csv));
+            FileOutputStream fos = new FileOutputStream(binario);
+            DataOutputStream dos = new DataOutputStream(fos); 
+      
             String linha;
 
             while ((linha = br.readLine()) != null) {
-             
-
                 String[] campos = AuxFuncoes.separarPorVirgula(linha);
 
                 int numeroCapitulo = Integer.parseInt(campos[0]);
@@ -22,20 +22,16 @@ public class ImportadorCSV {
                 int paginas = Integer.parseInt(campos[5]);
                 String data = AuxFuncoes.formatarData(campos[6]);
                 String episodio = campos[7];
-                
+
                 Capitulo capitulo = new Capitulo(numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
                 byte[] dataBytes = capitulo.toByteArray();
-                
- 
-                fos.write(1);
 
-                fos.write(dataBytes.length);
-
-                fos.write(dataBytes);
-
+                dos.writeByte(1); // Marca como válido
+                dos.writeInt(dataBytes.length); // Escreve o tamanho do array
+                dos.write(dataBytes); // Escreve os dados binários do capítulo
             }
 
-        }
-
-    }
+       br.close();
+       fos.close();
+    } 
 }

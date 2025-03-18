@@ -1,0 +1,165 @@
+private static boolean capituloExiste(int numero) throws IOException {
+        String BD = "dataset/capitulos.bd";  // Se não for global, defina aqui
+        File file = new File(BD);
+        
+        if (!file.exists()) {
+            return false;
+        }
+    
+        try (FileInputStream fis = new FileInputStream(BD);
+             DataInputStream dis = new DataInputStream(fis)) {
+    
+            while (dis.available() > 0) {
+                int len = dis.readInt();
+    
+                if (len <= 0 || len > dis.available()) {
+                    System.out.println("Erro: tamanho inválido encontrado.");
+                    break;
+                }
+    
+                byte[] ba = new byte[len];
+                dis.readFully(ba);
+    
+                try {
+                    Capitulo capitulo = Capitulo.fromByteArray(ba);
+                    if (capitulo.getNumCapitulo() == numero) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Erro ao converter bytes para Capitulo.");
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+    
+   
+    //FAZER
+    private static void atualizarCapitulo() throws IOException {
+        System.out.println("\n--- Atualizar Capitulo ---");
+    
+        System.out.print("Numero do Capitulo para atualizar: ");
+        int numero = MyIO.readInt();
+        MyIO.readLine(); // Consumir quebra de linha
+    
+        File arquivo = new File("dataset/capitulos.db");
+    
+        if (!capituloExiste(numero)) {
+            System.out.println("Erro: Capítulo " + numero + " não existe no banco de dados.");
+            return;
+        }
+    
+        // Criação de fluxo de entrada e saída
+        try (FileInputStream fis = new FileInputStream(arquivo);
+             DataInputStream dis = new DataInputStream(fis);
+             ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             DataOutputStream dos = new DataOutputStream(baos)) {
+    
+            boolean encontrado = false;
+    
+            while (dis.available() > 0) {
+                int len = dis.readInt();
+                byte[] ba = new byte[len];
+                dis.readFully(ba);
+    
+                Capitulo capitulo = Capitulo.fromByteArray(ba);
+                if (capitulo.getNumCapitulo() == numero) {
+                    encontrado = true;
+    
+                    System.out.print("Novo volume: ");
+                    capitulo.setVolume(MyIO.readInt());
+    
+                    MyIO.readLine(); // Consumir quebra de linha
+                    System.out.print("Novo nome: ");
+                    capitulo.setNome(MyIO.readLine());
+    
+                    System.out.print("Novos Títulos Inglês e Original (separados por vírgula): ");
+                    String[] titulos = MyIO.readLine().split(",");
+                    capitulo.setTitulos(titulos);
+    
+                    System.out.print("Novo número de páginas: ");
+                    capitulo.setPaginas(MyIO.readInt());
+                    MyIO.readLine();
+    
+                    System.out.print("Nova data: ");
+                    capitulo.setData(MyIO.readLine());
+    
+                    System.out.print("Novo episódio: ");
+                    capitulo.setEpisodio(MyIO.readLine());
+                }
+    
+                byte[] updatedBa = capitulo.toByteArray();
+                dos.writeInt(updatedBa.length);
+                dos.write(updatedBa);
+            }
+    
+            if (encontrado) {
+                try (FileOutputStream fos = new FileOutputStream(arquivo);
+                     DataOutputStream dosFinal = new DataOutputStream(fos)) {
+                    dosFinal.write(baos.toByteArray());
+                    System.out.println("Capítulo atualizado com sucesso.");
+                }
+            } else {
+                System.out.println("Capítulo não encontrado.");
+            }
+        }
+    }
+    
+    
+    
+    //FAZER
+    private static void deletarCapitulo() throws IOException {
+        System.out.println("\n--- Deletar Capítulo ---");
+    
+        System.out.print("Número do Capítulo para deletar: ");
+        int numero = MyIO.readInt();
+        MyIO.readLine(); // Consome o caractere de nova linha após a leitura do número
+    
+        File arquivo = new File("dataset/capitulos.bd");
+    
+        try (FileInputStream fis = new FileInputStream(arquivo);
+             DataInputStream dis = new DataInputStream(fis);
+             ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             DataOutputStream dos = new DataOutputStream(baos)) {
+    
+            boolean encontrado = false;
+    
+            while (dis.available() > 0) {
+                int len = dis.readInt();
+    
+                if (len <= 0 || len > dis.available()) {
+                    System.out.println("ERRO: Tamanho inválido detectado, ignorando entrada corrompida.");
+                    break;
+                }
+    
+                byte[] ba = new byte[len];
+                dis.readFully(ba);
+    
+                Capitulo capitulo = Capitulo.fromByteArray(ba);
+                if (capitulo.getNumCapitulo() == numero) {
+                    encontrado = true;
+    
+                    // Marca o capítulo como deletado, alterando o byte de validade
+                    byte[] updatedBa = capitulo.toByteArray();
+                    updatedBa[0] = 0;  // Altera o primeiro byte para 0, indicando que o registro está "deletado"
+    
+                    dos.writeInt(updatedBa.length); // Escreve o novo tamanho
+                    dos.write(updatedBa); // Escreve os dados alterados
+                } else {
+                    dos.writeInt(len);
+                    dos.write(ba);  // Mantém o capítulo inalterado
+                }
+            }
+    
+            if (encontrado) {
+                try (FileOutputStream fos = new FileOutputStream(arquivo);
+                     DataOutputStream dosFinal = new DataOutputStream(fos)) {
+                    dosFinal.write(baos.toByteArray());
+                    System.out.println("Capítulo deletado com sucesso.");
+                }
+            } else {
+                System.out.println("Capítulo não encontrado.");
+            }
+        }
+    }

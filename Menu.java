@@ -5,7 +5,7 @@ public class Menu {
 
     public static void menu() throws IOException {
         String BD = "dataset/capitulos.db";
-        FileOutputStream arq = new FileOutputStream(BD);
+        FileOutputStream arq = new FileOutputStream(BD, true);
         DataOutputStream dos = new DataOutputStream(arq);
 
         FileInputStream arq2 = new FileInputStream(BD);
@@ -20,7 +20,7 @@ public class Menu {
             MyIO.println("5. Deletar Capitulo");
             MyIO.println("6. Sair");
 
-            MyIO.print("Escolha uma opção: ");
+            MyIO.print("Escolha uma opcao: ");
             int opcao = MyIO.readInt();  // Mantendo o MyIO para entrada de dados
 
             switch (opcao) {
@@ -85,43 +85,36 @@ public class Menu {
 
     //FAZER
     private static void lerCapitulo(DataInputStream dis) throws IOException {
-        // Lógica para ler um capítulo
-        MyIO.print("\nInforme o ID do capítulo: ");
-        int idProcurado = MyIO.readInt();
+        MyIO.print("(int) Qual o Capitulo/Id? ");
+        int op = MyIO.readInt();
 
-        try {
-            while (dis.available() > 0) {
-                byte valido = dis.readByte(); // Lê o byte de validade
-                int tamanhoVetor = dis.readInt(); // Lê o tamanho do vetor
-                int id = dis.readInt(); // Lê o ID
+        while (dis.available() > 0) {
+            byte valido = dis.readByte(); // Lê o byte de validade
+            int tamanhoVetor = dis.readInt(); // Lê o tamanho do vetor (4 bytes)
+            int id = dis.readInt();
+            
+            if (valido == 1 && op == id) {
+                MyIO.println("achooooou");
+                byte[] byteArray = new byte[tamanhoVetor];
+                dis.readFully(byteArray);  // Preenche o byteArray com os dados do capítulo
 
-                if (valido == 1 && id == idProcurado) {
-                    byte[] bytes = new byte[tamanhoVetor];
-                    dis.readFully(bytes); // Lê os bytes do capítulo
-
-                    Capitulo capitulo = Capitulo.fromByteArray(bytes); // Converte os bytes para um objeto Capitulo
-                   
-                } else {
-                    dis.skipBytes(tamanhoVetor); // Pula os bytes do capítulo
-                }
+                Capitulo capitulo = new Capitulo();
+                capitulo.fromByteArray(byteArray); // Preenche o capítulo com os dados
+                System.out.println(capitulo.toString()); // Exibe o conteúdo do capítulo
+            } else {
+                // Se o vetor não for válido, pula os bytes correspondentes ao tamanho do vetor
+                dis.skipBytes(tamanhoVetor);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
-        MyIO.println("Capítulo não encontrado!");
     }
+
     //FAZER
     private static void lerCapitulos(DataInputStream dis) throws IOException {
     }
-    //FAZER
+
     private static void atualizarCapitulo() {
-        // Lógica de atualização do capítulo
     }
-    //FAZER
+
     private static void deletarCapitulo() {
-        // Lógica de deleção do capítulo
     }
-
-
 }

@@ -53,4 +53,6 @@ public class AuxFuncoes {
             return data; // Retorna a entrada original se a conversão falhar
         }
     }
+
 }
+

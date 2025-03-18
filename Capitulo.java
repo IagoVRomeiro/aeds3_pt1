@@ -67,29 +67,21 @@ class Capitulo {
         return baos.toByteArray();
     }
 
-    public static Capitulo fromByteArray(byte[] data) throws IOException {
+    public void fromByteArray(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
 
-        byte valido = dis.readByte();
-        int tamanhoVetor = dis.readInt();
-
-        if (valido == 1) {
-            MyIO.println("Tamanho do Vetor" + tamanhoVetor);
-        }
-        int numCapitulo = dis.readInt();
-        int volume = dis.readInt();
-        String nome = dis.readUTF();
-        int qtdString = dis.readInt();
-        String[] titulos = new String[qtdString];
+        this.numCapitulo = dis.readInt();
+        this.volume = dis.readInt();
+        this.nome = dis.readUTF();
+        this.qtdString = dis.readInt();
+        this.titulos = new String[qtdString];
         for (int i = 0; i < qtdString; i++) {
-            titulos[i] = dis.readUTF();
+            this.titulos[i] = dis.readUTF();
         }
-        int paginas = dis.readInt();
-        String dataStr = dis.readUTF();
-        String episodio = dis.readUTF();
-
-        return new Capitulo(numCapitulo, volume, nome, titulos, paginas, dataStr, episodio);
+        this.paginas = dis.readInt();
+        this.data = dis.readUTF();
+        this.episodio = dis.readUTF();
 
     }
 
