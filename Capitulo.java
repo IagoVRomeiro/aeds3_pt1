@@ -1,148 +1,136 @@
-
 import java.io.*;
 
 class Capitulo {
+    
+    protected Short NumeroCapitulo;
+    protected Short Volume;
+    protected String Nome;
+    protected String[] Titulos; // Vetor para TituloOriginal e TituloIngles
+    protected Short Paginas;
+    protected String Data;
+    protected String Episodio;
 
-    protected int numCapitulo;
-    protected int volume;
-    protected String nome;
-    protected String[] titulos;
-    protected int qtdString;
-    protected int paginas;
-    protected String data;
-    protected String episodio;
-
-    public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) {;
-        this.numCapitulo = numCapitulo;
-        this.volume = volume;
-        this.nome = nome;
-        this.qtdString = titulos.length;
-        this.titulos = titulos;
-        this.paginas = paginas;
-        this.data = data;
-        this.episodio = episodio;
+    public Capitulo(Short a, Short b, String c, String[] d, Short e, String f, String g) {
+        NumeroCapitulo = a;
+        Volume = b;
+        Nome = c;  
+        Titulos = d;
+        Paginas = e;
+        Data = f;
+        Episodio = g;
     }
 
     public Capitulo() {
-        this.numCapitulo = -1;
-        this.volume = -1;
-        this.nome = "";
-        this.titulos = new String[]{"", ""};
-        this.qtdString = titulos.length;
-        this.paginas = -1;
-        this.data = "";
-        this.episodio = "";
+        NumeroCapitulo = -1;
+        Volume = -1;
+        Nome = "";  
+        Titulos = new String[]{"", ""};
+        Paginas = -1;
+        Data = "";
+        Episodio = "";
     }
 
     @Override
     public String toString() {
-        return "NumeroCapitulo: " + numCapitulo
-                + ", Volume: " + volume
-                + ", Nome: " + nome
-                + ", TituloOriginal: " + titulos[0]
-                + ", TituloIngles: " + titulos[1]
-                + ", QtdString: " + qtdString
-                + ", Paginas: " + paginas
-                + ", Data: " + data
-                + ", Episodio: " + episodio;
+        return "\nNumeroCapitulo: " + NumeroCapitulo +
+               "\nVolume: " + Volume +
+               "\nNome: " + Nome +  
+               "\nTituloOriginal: " + Titulos[0] +
+               "\nTituloIngles: " + Titulos[1] +
+               "\nPaginas: " + Paginas +
+               "\nData: " + Data +
+               "\nEpisodio: " + Episodio;
     }
 
     public byte[] toByteArray() throws IOException {
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
-
-        // Escreve os dados do registro
-        dos.writeInt(numCapitulo);
-        dos.writeInt(volume);
-        dos.writeUTF(nome);
-        dos.writeInt(qtdString);
-        for (String titulo : titulos) {
-            dos.writeUTF(titulo);
-        }
-        dos.writeInt(paginas);
-        dos.writeUTF(data);
-        dos.writeUTF(episodio);
-
+        
+        dos.writeShort(NumeroCapitulo);
+        dos.writeShort(Volume);
+        dos.writeUTF(Nome);
+        dos.writeUTF(Titulos[0]);
+        dos.writeUTF(Titulos[1]);
+        dos.writeShort(Paginas);
+        dos.writeUTF(Data);
+        dos.writeUTF(Episodio);
+        
         return baos.toByteArray();
     }
-
-    public void fromByteArray(byte[] data) throws IOException {
+    
+    public static Capitulo fromByteArray(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
-
-        this.numCapitulo = dis.readInt();
-        this.volume = dis.readInt();
-        this.nome = dis.readUTF();
-        this.qtdString = dis.readInt();
-        this.titulos = new String[qtdString];
-        for (int i = 0; i < qtdString; i++) {
-            this.titulos[i] = dis.readUTF();
-        }
-        this.paginas = dis.readInt();
-        this.data = dis.readUTF();
-        this.episodio = dis.readUTF();
-
+    
+        Short NumeroCapitulo = dis.readShort();
+        Short Volume = dis.readShort();
+        String Nome = dis.readUTF();
+        String[] Titulos = {dis.readUTF(), dis.readUTF()};
+        Short Paginas = dis.readShort();
+        String Data = dis.readUTF();
+        String Episodio = dis.readUTF();
+    
+        return new Capitulo(NumeroCapitulo, Volume, Nome, Titulos, Paginas, Data, Episodio);
     }
 
-    public int getNumCapitulo() {
-        return numCapitulo;
+    public int getNumeroCapitulo() {
+        return NumeroCapitulo;
     }
 
-    public int getVolume() {
-        return volume;
+    public Short getVolume() {
+        return Volume;
     }
 
     public String getNome() {
-        return nome;
+        return Nome;
     }
 
     public String[] getTitulos() {
-        return titulos;
+        return Titulos;
     }
 
-    public int getQtdString() {
-        return qtdString;
-    }
-
-    public int getPaginas() {
-        return paginas;
+    public Short getPaginas() {
+        return Paginas;
     }
 
     public String getData() {
-        return data;
+        return Data;
     }
 
     public String getEpisodio() {
-        return episodio;
+        return Episodio;
     }
 
-    public void setNumCapitulo(int numCapitulo) {
-        this.numCapitulo = numCapitulo;
+    // Setters
+    public void setNumeroCapitulo(Short numeroCapitulo) {
+        this.NumeroCapitulo = numeroCapitulo;
     }
 
-    public void setVolume(int volume) {
-        this.volume = volume;
+    public void setVolume(Short volume) {
+        this.Volume = volume;
     }
 
     public void setNome(String nome) {
-        this.nome = nome;
+        this.Nome = nome;
     }
 
-    public void setTitulos(String[] titulos) {
-        this.titulos = titulos;
-        this.qtdString = titulos.length;
+    public void setTituloOriginal(String titulosOriginal) {
+        this.Titulos[0] = titulosOriginal;
     }
 
-    public void setPaginas(int paginas) {
-        this.paginas = paginas;
+    public void setTituloIngles(String titulosIngles) {
+        this.Titulos[1] = titulosIngles;
+    }
+
+    public void setPaginas(Short paginas) {
+        this.Paginas = paginas;
     }
 
     public void setData(String data) {
-        this.data = data;
+        this.Data = data;
     }
 
     public void setEpisodio(String episodio) {
-        this.episodio = episodio;
+        this.Episodio = episodio;
     }
 }
