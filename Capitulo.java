@@ -12,7 +12,7 @@ class Capitulo {
     protected String data;
     protected String episodio;
 
-    public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) throws IOException {;
+    public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) throws IOException {
         this.numCapitulo = numCapitulo;
         this.volume = volume;
         this.nome = nome;
@@ -21,16 +21,9 @@ class Capitulo {
         this.paginas = paginas;
         this.data = data;
         this.episodio = episodio;
+        AuxFuncoes.ReescreverUltimoIdInserido(this);
 
-
-        //reescrever o ultimo id inserido
-        RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw");
-        if(getNumCapitulo() < RAF.readInt()){
-            RAF.writeInt(getNumCapitulo());
-            RAF.close();
-        }
-     
-    }   
+    }
 
     public Capitulo() {
         this.numCapitulo = -1;
@@ -45,8 +38,7 @@ class Capitulo {
 
     @Override
     public String toString() {
-        return "NumeroCapitulo: " + numCapitulo
-                + ", Volume: " + volume
+        return ", Volume: " + volume
                 + ", Nome: " + nome
                 + ", TituloOriginal: " + titulos[0]
                 + ", TituloIngles: " + titulos[1]
@@ -130,7 +122,7 @@ class Capitulo {
 
     public void setNumCapitulo(int numCapitulo) {
         this.numCapitulo = numCapitulo;
-        
+
     }
 
     public void setVolume(int volume) {

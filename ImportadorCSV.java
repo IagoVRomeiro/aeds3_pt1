@@ -1,38 +1,42 @@
+
 import java.io.*;
 
 public class ImportadorCSV {
+
     public static void importarCSVParaBinario() throws IOException {
         String csv = "dataset/capitulos.csv";
         String binario = "dataset/capitulos.db";
 
-      
-            BufferedReader br = new BufferedReader(new FileReader(csv));
-            FileOutputStream fos = new FileOutputStream(binario);
-            DataOutputStream dos = new DataOutputStream(fos); 
-      
-            String linha;
+        // Abre o arquivo CSV para leitura e o arquivo binário para escrita
+        BufferedReader br = new BufferedReader(new FileReader(csv));
+        RandomAccessFile raf = new RandomAccessFile(binario, "rw");
 
-            dos.writeInt(0);
-            while ((linha = br.readLine()) != null) {
-                String[] campos = AuxFuncoes.separarPorVirgula(linha);
+        String linha;
 
-                int numeroCapitulo = Integer.parseInt(campos[0]);
-                int volume = Integer.parseInt(campos[1]);
-                String nome = campos[2];
-                String[] titulos = {campos[3], campos[4]};
-                int paginas = Integer.parseInt(campos[5]);
-                String data = AuxFuncoes.formatarData(campos[6]);
-                String episodio = campos[7];
+        // Reserva 4 bytes para o último ID inserido (inicializa com 0)
+        raf.writeInt(0);
 
-                Capitulo capitulo = new Capitulo(numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
-                byte[] dataBytes = capitulo.toByteArray();
+        while ((linha = br.readLine()) != null) {
+            String[] campos = AuxFuncoes.separarPorVirgula(linha);
 
-                dos.writeByte(1); // Marca como válido
-                dos.writeInt(dataBytes.length); // Escreve o tamanho do array
-                dos.write(dataBytes); // Escreve os dados binários do capítulo
-            }
+            int numeroCapitulo = Integer.parseInt(campos[0]);
+            int volume = Integer.parseInt(campos[1]);
+            String nome = campos[2];
+            String[] titulos = {campos[3], campos[4]};
+            int paginas = Integer.parseInt(campos[5]);
+            String data = AuxFuncoes.formatarData(campos[6]);
+            String episodio = campos[7];
 
-       br.close();
-       fos.close();
-    } 
+            // Criação do objeto Capitulo
+            Capitulo capitulo = new Capitulo(numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
+            byte[] dataBytes = capitulo.toByteArray();
+
+            // Chama a função para escrever no arquivo binário
+            AuxFuncoes.escreverCapitulo(raf, dataBytes);
+        }
+
+        // Fecha os recursos abertos
+        br.close();
+        raf.close();
+    }
 }

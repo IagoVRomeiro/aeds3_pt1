@@ -1,3 +1,6 @@
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,16 +38,18 @@ public class AuxFuncoes {
     }
 
     public static String formatarData(String data) {
-        if (data == null)
+        if (data == null) {
             return null;
+        }
 
         // Ajusta espaços extras e remove vírgulas desnecessárias
         data = data.trim().replace(",", "");
 
         // Regex corrigida para permitir vírgula opcional após o dia
         String regexData = "^[A-Za-z]+ \\d{1,2} \\d{4}$";
-        if (!data.matches(regexData))
+        if (!data.matches(regexData)) {
             return data;
+        }
 
         try {
             SimpleDateFormat formatoEntrada = new SimpleDateFormat("MMMM d yyyy", Locale.ENGLISH);
@@ -67,6 +72,33 @@ public class AuxFuncoes {
         }
 
         return ids;
+    }
+
+    public static void ReescreverUltimoIdInserido(Capitulo capitulo) throws IOException {
+        RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw");
+
+        RAF.seek(0);
+        int ultimoId = RAF.readInt();
+
+        // Se o novo ID for maior, reescreve
+        if (capitulo.getNumCapitulo() > ultimoId) {
+            RAF.seek(0); // Volta para o início para sobrescrever
+            RAF.writeInt(capitulo.getNumCapitulo());
+        }
+
+        RAF.close(); // Garante que o arquivo será fechado
+    }
+
+    public static void escreverCapitulo(RandomAccessFile raf, byte[] dataBytes) throws IOException {
+        raf.seek(raf.length()); // Posiciona no final do arquivo para inserir o novo capítulo
+        // Marca como válido
+        raf.writeByte(1);
+
+        // Escreve o tamanho do array
+        raf.writeInt(dataBytes.length);
+
+        // Escreve os dados binários do capítulo
+        raf.write(dataBytes);
     }
 
 }
