@@ -11,38 +11,40 @@ public class AuxFuncoes {
         String regex = "\"([^\"]*)\"|([^,\"]*)";
 
         List<String> campos = new ArrayList<>();
-        
+
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(texto);
-        
+
         while (matcher.find()) {
             // Verifica se o campo está entre aspas ou não
             String campo = null;
             if (matcher.group(1) != null) {
-                campo = matcher.group(1);  // Campo entre aspas
+                campo = matcher.group(1); // Campo entre aspas
             } else if (matcher.group(2) != null) {
-                campo = matcher.group(2);  // Campo simples
+                campo = matcher.group(2); // Campo simples
             }
-            
+
             // Adiciona o campo ao resultado apenas se não for vazio
             if (campo != null && !campo.isEmpty()) {
                 campos.add(campo);
             }
         }
-        
+
         // Convertendo a lista para um array
         return campos.toArray(new String[0]);
     }
-    
+
     public static String formatarData(String data) {
-        if (data == null) return null;
+        if (data == null)
+            return null;
 
         // Ajusta espaços extras e remove vírgulas desnecessárias
         data = data.trim().replace(",", "");
 
         // Regex corrigida para permitir vírgula opcional após o dia
         String regexData = "^[A-Za-z]+ \\d{1,2} \\d{4}$";
-        if (!data.matches(regexData)) return data;
+        if (!data.matches(regexData))
+            return data;
 
         try {
             SimpleDateFormat formatoEntrada = new SimpleDateFormat("MMMM d yyyy", Locale.ENGLISH);
@@ -54,5 +56,17 @@ public class AuxFuncoes {
         }
     }
 
-}
+    public static int[] PerguntaQTD() {
 
+        System.out.println("\nDigite a quantidade de capitulos que deseja pesquisar: ");
+        int qtdIds = MyIO.readInt();
+        int[] ids = new int[qtdIds];
+        for (int i = 0; i < qtdIds; i++) {
+            MyIO.println("Qual o Id do capitulo?");
+            ids[i] = MyIO.readInt();
+        }
+
+        return ids;
+    }
+
+}
