@@ -2,7 +2,7 @@
 import java.io.*;
 
 class Capitulo {
-
+    protected int id;
     protected int numCapitulo;
     protected int volume;
     protected String nome;
@@ -12,7 +12,10 @@ class Capitulo {
     protected String data;
     protected String episodio;
 
-    public Capitulo(int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) throws IOException {
+
+    //Construtores, ToString, ToByteArray, FromByteArray, Gets, Sets.
+    public Capitulo(int id, int numCapitulo, int volume, String nome, String[] titulos, int paginas, String data, String episodio) throws IOException {
+        this.id = id;
         this.numCapitulo = numCapitulo;
         this.volume = volume;
         this.nome = nome;
@@ -21,11 +24,11 @@ class Capitulo {
         this.paginas = paginas;
         this.data = data;
         this.episodio = episodio;
-        AuxFuncoes.ReescreverUltimoIdInserido(this);
 
     }
 
     public Capitulo() {
+        this.id = -1;
         this.numCapitulo = -1;
         this.volume = -1;
         this.nome = "";
@@ -38,7 +41,7 @@ class Capitulo {
 
     @Override
     public String toString() {
-        return ", Volume: " + volume
+        return "Volume: " + volume
                 + ", Nome: " + nome
                 + ", TituloOriginal: " + titulos[0]
                 + ", TituloIngles: " + titulos[1]
@@ -54,6 +57,7 @@ class Capitulo {
         DataOutputStream dos = new DataOutputStream(baos);
 
         // Escreve os dados do registro
+        dos.writeInt(id);
         dos.writeInt(numCapitulo);
         dos.writeInt(volume);
         dos.writeUTF(nome);
@@ -72,6 +76,7 @@ class Capitulo {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
 
+        this.id = dis.readInt();
         this.numCapitulo = dis.readInt();
         this.volume = dis.readInt();
         this.nome = dis.readUTF();

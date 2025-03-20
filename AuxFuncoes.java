@@ -1,4 +1,3 @@
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.ParseException;
@@ -9,9 +8,10 @@ import java.util.regex.Pattern;
 
 public class AuxFuncoes {
 
+    // Separar campos do CSV
     public static String[] separarPorVirgula(String texto) {
-        // Regex para capturar campos entre aspas ou campos simples
-        String regex = "\"([^\"]*)\"|([^,\"]*)";
+
+        String regex = "\"([^\"]*)\"|([^,\"]*)";// Tratar campo string
 
         List<String> campos = new ArrayList<>();
 
@@ -33,10 +33,10 @@ public class AuxFuncoes {
             }
         }
 
-        // Convertendo a lista para um array
         return campos.toArray(new String[0]);
     }
 
+    // Formatar data para dd/mm/aaaa
     public static String formatarData(String data) {
         if (data == null) {
             return null;
@@ -51,7 +51,7 @@ public class AuxFuncoes {
             return data;
         }
 
-        try {
+        try { // Formatar data de mm/dd/yyyy para dd/mm/aaaa
             SimpleDateFormat formatoEntrada = new SimpleDateFormat("MMMM d yyyy", Locale.ENGLISH);
             SimpleDateFormat formatoSaida = new SimpleDateFormat("dd/MM/yyyy");
             Date date = formatoEntrada.parse(data);
@@ -61,36 +61,57 @@ public class AuxFuncoes {
         }
     }
 
-    public static int[] PerguntaQTD() {
+    // Perguta Quantidade de Ids, em seguida preenche um vetor com os ids desejados
+    public static int[] PerguntaQTD_ID() {
+        int ultimoId = 0;
 
-        System.out.println("\nDigite a quantidade de capitulos que deseja pesquisar: ");
+        try (RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw")) {
+            if (RAF.length() >= 4) {
+                RAF.seek(0);
+                ultimoId = RAF.readInt();
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao acessar o arquivo: " + e.getMessage());
+            return new int[0]; // Retorna um array vazio se houver erro
+        }
+
+        System.out.println("\nDigite a quantidade de capítulos que deseja pesquisar: ");
         int qtdIds = MyIO.readInt();
         int[] ids = new int[qtdIds];
+
         for (int i = 0; i < qtdIds; i++) {
-            MyIO.println("Qual o Id do capitulo?");
-            ids[i] = MyIO.readInt();
+            do {
+                MyIO.println("Qual o ID do capítulo?");
+                ids[i] = MyIO.readInt();
+
+                if (ids[i] > ultimoId) {
+                    MyIO.println("ID inválido. O último ID registrado é " + ultimoId + ". Digite novamente.");
+                }
+            } while (ids[i] > ultimoId);
         }
 
         return ids;
     }
 
-    public static void ReescreverUltimoIdInserido(Capitulo capitulo) throws IOException {
+    // Reescreve ultimo id inserido
+    public static void ReescreverUltimoIdInserido() throws IOException {
         RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw");
 
         RAF.seek(0);
-        int ultimoId = RAF.readInt();
+        int ultimoID = RAF.readInt();
 
-        // Se o novo ID for maior, reescreve
-        if (capitulo.getNumCapitulo() > ultimoId) {
-            RAF.seek(0); // Volta para o início para sobrescrever
-            RAF.writeInt(capitulo.getNumCapitulo());
-        }
+        RAF.seek(0);
+        RAF.writeInt(ultimoID + 1);
 
-        RAF.close(); // Garante que o arquivo será fechado
+        RAF.close();
     }
 
-    public static void escreverCapitulo(RandomAccessFile raf, byte[] dataBytes) throws IOException {
-        raf.seek(raf.length()); // Posiciona no final do arquivo para inserir o novo capítulo
+    // Inseri o array de bytes no final do arquivo .db
+    public static void escreverCapitulo_FIM(RandomAccessFile raf, byte[] dataBytes) throws IOException {
+
+        // Posiciona o ponteiro no final do arquivo para inserir o novo capítulo
+        raf.seek(raf.length());
+
         // Marca como válido
         raf.writeByte(1);
 
@@ -99,6 +120,56 @@ public class AuxFuncoes {
 
         // Escreve os dados binários do capítulo
         raf.write(dataBytes);
+    }
+
+    // Pergunta qual ID
+    public static int qualCapitulo() {
+
+        MyIO.println("Qual o Capitulo?");
+        int i = MyIO.readInt();
+        return i;
+    }
+
+    // Cria e retorna um objeto capitulo
+    public static Capitulo CriarCapitulo() throws IOException {
+        try (RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw")) {
+            int UltimoId = 0;
+
+            RAF.seek(0);
+            UltimoId = RAF.readInt();
+
+            // Coleta dos dados do novo capítulo
+
+            int id = UltimoId + 1;
+
+            MyIO.print("(int) Capitulo: ");
+            int numCapitulo = MyIO.readInt();
+
+            MyIO.print("(int) Volume: ");
+            int volume = MyIO.readInt();
+
+            MyIO.print("(String) Nome: ");
+            String nome = MyIO.readLine();
+
+            MyIO.print("(String) Título Original: ");
+            String tituloOriginal = MyIO.readLine();
+
+            MyIO.print("(String) Título Inglês: ");
+            String tituloIngles = MyIO.readLine();
+
+            MyIO.print("(int) Páginas: ");
+            int paginas = MyIO.readInt();
+
+            MyIO.print("(xx/xx/xxxx) Data: ");
+            String data = MyIO.readLine();
+
+            MyIO.print("(String) Episódio: ");
+            String episodio = MyIO.readLine();
+
+            String[] titulos = { tituloOriginal, tituloIngles };
+
+            return new Capitulo(id, numCapitulo, volume, nome, titulos, paginas, data, episodio);
+        }
     }
 
 }
