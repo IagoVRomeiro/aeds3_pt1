@@ -10,7 +10,7 @@ INT(4 BYTES) = TAMANHO VETOR
 
 (DADOS)
 int (4 BYTES) = ID
-INT(4 BYTES) NUMERO_CAPITULO
+Short(2 BYTES) NUMERO_CAPITULO
 Short(2 BYTES) volume;
 String nome
 Short(2 BYTES) int qtdString;
