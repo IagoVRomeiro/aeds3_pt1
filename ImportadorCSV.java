@@ -14,13 +14,12 @@ public class ImportadorCSV {
 
         String linha;
 
-        // Reserva 4 bytes para o último ID inserido (inicializa com 0)
+        // Reserva 4 bytes para o último ID inserido
         raf.writeInt(0);
 
         while ((linha = br.readLine()) != null) {
             String[] campos = AuxFuncoes.separarPorVirgula(linha);
 
-            // Preenche os campos com os dados separados por ','
 
             Short numeroCapitulo = Short.parseShort(campos[0]);
             int id = numeroCapitulo;
@@ -31,7 +30,6 @@ public class ImportadorCSV {
             String data = AuxFuncoes.formatarData(campos[6]);
             String episodio = campos[7];
 
-            // Criação do objeto Capitulo
             Capitulo capitulo = new Capitulo(id, numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
             byte[] dataBytes = capitulo.toByteArray();
 

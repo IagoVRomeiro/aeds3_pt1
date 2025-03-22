@@ -1,44 +1,45 @@
-
 import java.io.*;
 
+// Classe que representa um Capítulo com diversos atributos e métodos relacionados à leitura e escrita de dados.
 class Capitulo {
-    protected int id;
-    protected Short numCapitulo;
-    protected Short volume;
-    protected String nome;
-    protected String[] titulos;
-    protected byte qtdString;
-    protected Short paginas;
-    protected String data;
-    protected String episodio;
+    protected int id; // Identificador do capítulo
+    protected Short numCapitulo; // Número do capítulo
+    protected Short volume; // Volume ao qual o capítulo pertence
+    protected String nome; // Nome do capítulo
+    protected String[] titulos; // Array de títulos (ex: Título original, Título em inglês)
+    protected byte qtdString; // Quantidade de títulos no array titulos
+    protected Short paginas; // Número de páginas do capítulo
+    protected String data; // Data de lançamento do capítulo
+    protected String episodio; // Episódio relacionado ao capítulo
 
-    // Construtores, ToString, ToByteArray, FromByteArray, Gets, Sets.
+    // Construtor
     public Capitulo(int id, Short numCapitulo, Short volume, String nome, String[] titulos, Short paginas, String data,
             String episodio) throws IOException {
         this.id = id;
         this.numCapitulo = numCapitulo;
         this.volume = volume;
         this.nome = nome;
-        this.qtdString = (byte)titulos.length;
+        this.qtdString = (byte) titulos.length; 
         this.titulos = titulos;
         this.paginas = paginas;
         this.data = data;
         this.episodio = episodio;
-
     }
 
+    // Construtor padrão
     public Capitulo() {
         this.id = -1;
         this.numCapitulo = -1;
         this.volume = -1;
         this.nome = "";
-        this.titulos = new String[] { "", "" };
-        this.qtdString = (byte)titulos.length;
+        this.titulos = new String[] { "", "" }; 
+        this.qtdString = (byte) titulos.length;
         this.paginas = -1;
         this.data = "";
         this.episodio = "";
     }
 
+    //Ver objeto
     @Override
     public String toString() {
         return "ID: " + id 
@@ -53,31 +54,33 @@ class Capitulo {
                 + "\n Episodio: " + episodio;
     }
 
+    // Método que converte o objeto em um array de bytes (serialização)
     public byte[] toByteArray() throws IOException {
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
 
-        // Escreve os dados do registro
+
         dos.writeInt(id);
         dos.writeShort(numCapitulo);
         dos.writeShort(volume);
         dos.writeUTF(nome);
         dos.writeByte(qtdString);
         for (String titulo : titulos) {
-            dos.writeUTF(titulo);
+            dos.writeUTF(titulo); 
         }
         dos.writeShort(paginas);
         dos.writeUTF(data);
         dos.writeUTF(episodio);
 
-        return baos.toByteArray();
+        return baos.toByteArray(); 
     }
 
+    // Método que converte um array de bytes em um objeto Capitulo (desserialização)
     public void fromByteArray(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
 
+    
         this.id = dis.readInt();
         this.numCapitulo = dis.readShort();
         this.volume = dis.readShort();
@@ -85,7 +88,7 @@ class Capitulo {
         this.qtdString = dis.readByte();
         this.titulos = new String[qtdString];
         for (byte i = 0; i < qtdString; i++) {
-            this.titulos[i] = dis.readUTF();
+            this.titulos[i] = dis.readUTF(); 
         }
         this.paginas = dis.readShort();
         this.data = dis.readUTF();
@@ -95,6 +98,7 @@ class Capitulo {
         dis.close();
     }
 
+    // Métodos getters e setters
     public int getId() {
         return id;
     }
@@ -137,7 +141,6 @@ class Capitulo {
 
     public void setNumCapitulo(Short numCapitulo) {
         this.numCapitulo = numCapitulo;
-
     }
 
     public void setVolume(Short volume) {
@@ -150,7 +153,7 @@ class Capitulo {
 
     public void setTitulos(String[] titulos) {
         this.titulos = titulos;
-        this.qtdString = (byte) titulos.length;
+        this.qtdString = (byte) titulos.length; 
     }
 
     public void setPaginas(Short paginas) {

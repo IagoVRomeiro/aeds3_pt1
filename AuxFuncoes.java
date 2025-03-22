@@ -3,55 +3,35 @@ import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class AuxFuncoes {
 
-    // Separar campos do CSV
+    // Separa o texto CSV corretamente tratando campos entre aspas
     public static String[] separarPorVirgula(String texto) {
-
-        String regex = "\"([^\"]*)\"|([^,\"]*)";// Tratar campo string
-
-        List<String> campos = new ArrayList<>();
-
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(texto);
-
-        while (matcher.find()) {
-            // Verifica se o campo está entre aspas ou não
-            String campo = null;
-            if (matcher.group(1) != null) {
-                campo = matcher.group(1); // Campo entre aspas
-            } else if (matcher.group(2) != null) {
-                campo = matcher.group(2); // Campo simples
-            }
-
-            // Adiciona o campo ao resultado apenas se não for vazio
-            if (campo != null && !campo.isEmpty()) {
-                campos.add(campo);
-            }
+        String[] campos = texto.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+    
+        for (int i = 0; i < campos.length; i++) {
+            campos[i] = campos[i].replaceAll("^\"|\"$", "");
         }
-
-        return campos.toArray(new String[0]);
+    
+        return campos;
     }
+    
 
-    // Formatar data para dd/mm/aaaa
+    // Converte a data de um formato para outro
     public static String formatarData(String data) throws ParseException {
-
         SimpleDateFormat formatoEntrada = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
         SimpleDateFormat formatoSaida = new SimpleDateFormat("dd/MM/yyyy");
         Date date = formatoEntrada.parse(data);
         return formatoSaida.format(date);
-
     }
 
-    // Perguta Quantidade de Ids, em seguida preenche um vetor com os ids desejados
+    // Pergunta a quantidade de IDs e os coleta
     public static int[] PerguntaQTD_ID() throws IOException {
         RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw");
 
-        RAF.seek(0);
-        int ultimoId = RAF.readInt();
+        RAF.seek(0);  
+        int ultimoId = RAF.readInt();  
 
         System.out.println("\nDigite a quantidade de capitulos que deseja pesquisar: ");
         int qtdIds = MyIO.readInt();
@@ -65,68 +45,59 @@ public class AuxFuncoes {
                 if (ids[i] > ultimoId) {
                     MyIO.println("ID invalido. O ultimo ID registrado é " + ultimoId + ". Digite novamente.");
                 }
-            } while (ids[i] > ultimoId);
+            } while (ids[i] > ultimoId);  
         }
-        RAF.close();
-        return ids;
+        RAF.close();  
+        return ids;  
     }
 
-    // Reescreve ultimo id inserido
+    // Reescreve o último ID inserido no arquivo
     public static void ReescreverUltimoIdInserido() throws IOException {
         RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw");
 
-        RAF.seek(0);
-        int ultimoID = RAF.readInt();
+        RAF.seek(0);  
+        int ultimoID = RAF.readInt();  
 
-        RAF.seek(0);
-        RAF.writeInt(ultimoID + 1);
+        RAF.seek(0);  
+        RAF.writeInt(ultimoID + 1);  
 
-        RAF.close();
+        RAF.close();  
     }
 
-    // Coloca o array de bytes no db
+    // Escreve os dados do capítulo no arquivo de forma binária
     public static void escreverCapitulo(byte[] dataBytes, long lugar) throws IOException {
         RandomAccessFile raf = new RandomAccessFile("dataset/capitulos.db", "rw");
-        // Posiciona o ponteiro
-        raf.seek(lugar);
+        raf.seek(lugar);  
 
-        // Marca como válido
-        raf.writeByte(1);
+        raf.writeByte(1);  
 
-        // Escreve o tamanho do array
-        
-            raf.writeInt(dataBytes.length);
-    
-      
-        // Escreve os dados binários do capítulo
-        raf.write(dataBytes);
-        raf.close();
+        raf.writeInt(dataBytes.length);  
+
+        raf.write(dataBytes);  
+        raf.close();  
     }
 
-    // Pergunta qual ID
+    // Pergunta ao usuário qual ID ele deseja 
     public static int qualID() {
-
         MyIO.println("Qual o ID?");
-        int i = MyIO.readInt();
-        return i;
+        int i = MyIO.readInt();  
+        return i;  
     }
 
-    // Cria e retorna um objeto capitulo
-    public static Capitulo CriarNovoCapitulo() throws IOException {
+    // Coleta dados para criar um novo capítulo
+    static Capitulo CriarNovoCapitulo() throws IOException {
         try (RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw")) {
             int UltimoId = 0;
 
-            RAF.seek(0);
-            UltimoId = RAF.readInt();
-
-            // Coleta dos dados do novo capítulo
+            RAF.seek(0);  
+            UltimoId = RAF.readInt();  
 
             int id = UltimoId + 1;
 
-            MyIO.print("(int) Capitulo: ");
+            MyIO.print("(short) Capitulo: ");
             Short numCapitulo = (short) MyIO.readInt();
 
-            MyIO.print("(int) Volume: ");
+            MyIO.print("(short) Volume: ");
             Short volume = (short) MyIO.readInt();
 
             MyIO.print("(String) Nome: ");
@@ -138,7 +109,7 @@ public class AuxFuncoes {
             MyIO.print("(String) Titulo Ingles: ");
             String tituloIngles = MyIO.readLine();
 
-            MyIO.print("(int) Paginas: ");
+            MyIO.print("(short) Paginas: ");
             Short paginas = (short) MyIO.readInt();
 
             MyIO.print("(xx/xx/xxxx) Data: ");
@@ -152,5 +123,4 @@ public class AuxFuncoes {
             return new Capitulo(id, numCapitulo, volume, nome, titulos, paginas, data, episodio);
         }
     }
-
 }
