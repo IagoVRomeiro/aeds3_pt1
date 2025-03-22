@@ -150,13 +150,9 @@ class MyIO {
  
     public static int readInt() {
        int i = -1;
-       while (true) {
-         try {
-            i = Integer.parseInt(readString().trim());
-            break;
-         } catch (Exception e) {
-            System.out.println("Entrada invalida");
-         }
+       try {
+          i = Integer.parseInt(readString().trim());
+       } catch (Exception e) {
        }
        return i;
     }
