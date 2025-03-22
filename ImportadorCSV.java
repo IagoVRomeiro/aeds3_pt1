@@ -1,45 +1,47 @@
+
 import java.io.*;
+import java.text.ParseException;
 
 public class ImportadorCSV {
 
-    public static void importarCSVParaBinario() {
+    public static void importarCSVParaBinario() throws IOException, ParseException {
         String csv = "dataset/capitulos.csv";
-        String binario = "capitulos.db";
+        String binario = "dataset/capitulos.db";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csv));
-             FileOutputStream fos = new FileOutputStream(binario)) {
+        // Abre o arquivo CSV para leitura e o arquivo binário para escrita
+        BufferedReader br = new BufferedReader(new FileReader(csv));
+        RandomAccessFile raf = new RandomAccessFile(binario, "rw");
 
-            String linha;
-            
-            while ((linha = br.readLine()) != null) {
+        String linha;
 
+        // Reserva 4 bytes para o último ID inserido (inicializa com 0)
+        raf.writeInt(0);
 
-                if (linha.trim().isEmpty()) {
-                    continue;
-                }
+        while ((linha = br.readLine()) != null) {
+            String[] campos = AuxFuncoes.separarPorVirgula(linha);
 
-                
-                String[] infos = linha.split(",");
-            
+            // Preenche os campos com os dados separados por ','
 
-                
-                Short numeroCapitulo = Short.parseShort(infos[0]);
-                Short volume = Short.parseShort(infos[1]);
-                String nome = infos[2];
-                String[] titulos = {infos[3], infos[4]};
-                Short paginas = Short.parseShort(infos[5]);
-                String data = infos[6];
-                String episodio = infos[7];
+            Short numeroCapitulo = Short.parseShort(campos[0]);
+            int id = numeroCapitulo;
+            Short volume = Short.parseShort(campos[1]);
+            String nome = campos[2];
+            String[] titulos = { campos[3], campos[4] };
+            Short paginas = Short.parseShort(campos[5]);
+            String data = AuxFuncoes.formatarData(campos[6]);
+            String episodio = campos[7];
 
-                Capitulo capitulo = new Capitulo(numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
+            // Criação do objeto Capitulo
+            Capitulo capitulo = new Capitulo(id, numeroCapitulo, volume, nome, titulos, paginas, data, episodio);
+            byte[] dataBytes = capitulo.toByteArray();
 
-                
-                byte[] dataBytes = capitulo.toByteArray();
-                fos.write(dataBytes);
-            }
-
-        } catch (IOException e) {
-            e.getMessage();
+            // funções para escrever no arquivo binário
+            AuxFuncoes.escreverCapitulo(dataBytes, raf.length());
+            AuxFuncoes.ReescreverUltimoIdInserido();
         }
+
+        // Fecha os recursos abertos
+        br.close();
+        raf.close();
     }
 }

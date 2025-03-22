@@ -11,12 +11,12 @@ INT(4 BYTES) = TAMANHO VETOR
 (DADOS)
 int (4 BYTES) = ID
 INT(4 BYTES) NUMERO_CAPITULO
-INT(4 BYTES) volume;
+Short(2 BYTES) volume;
 String nome
-INT(4 BYTES) int qtdString;
+Short(2 BYTES) int qtdString;
 String titulo_original
 String titulo_ingles
-INT(4 BYTES) int paginas;
+Byte(1 BYTES) int paginas;
 String data
 String episodio
 

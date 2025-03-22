@@ -1,309 +1,220 @@
+
 import java.io.*;
 
 public class Menu {
 
-   
-    private static final String Capitulos = "capitulos.db";
-    public static void menu() {
+    public static final String BD = "dataset/capitulos.db";
+
+    public static void menu() throws IOException {
         while (true) {
             MyIO.println("\n--- Menu CRUD Capitulo ---");
             MyIO.println("1. Criar Capitulo");
-            MyIO.println("2. Ler Capitulos");
-            MyIO.println("3. Atualizar Capitulo");
-            MyIO.println("4. Deletar Capitulo");
-            MyIO.println("5. Sair");
+            MyIO.println("2. Ler Um Capitulo");
+            MyIO.println("3. Ler Multiplos Capitulos");
+            MyIO.println("4. Atualizar Capitulo");
+            MyIO.println("5. Deletar Capitulo");
+            MyIO.println("6. Sair");
 
-            MyIO.print("Escolha uma opção: ");
+            MyIO.print("Escolha uma opcao: ");
             int opcao = MyIO.readInt();
-            
 
-            try {
-                switch (opcao) {
-                    case 1 -> criarCapitulo();
-                    case 2 -> Leitura.lerCapitulos();
-                    case 3 -> atualizarCapitulo();
-                    case 4 -> deletarCapitulo();
-                    case 5 -> {
-                        MyIO.println("Saindo...");
-                        System.exit(0);
-                    }
-                    default -> MyIO.println("Opção inválida. Tente novamente.");
+            switch (opcao) {
+                case 1 ->
+                    criarCapitulo(AuxFuncoes.CriarNovoCapitulo());
+                case 2 ->
+                    lerCapitulo(AuxFuncoes.qualID());
+                case 3 ->
+                    lerCapitulos(AuxFuncoes.PerguntaQTD_ID());
+                case 4 ->
+                    atualizarCapitulo(AuxFuncoes.qualID());
+                case 5 ->
+                    deletarCapitulo(AuxFuncoes.qualID());
+                case 6 -> {
+                    MyIO.println("Saindo...");
+                    System.exit(0);
                 }
-            } catch (IOException e) {
-                e.printStackTrace(); 
-                MyIO.println("Erro: " + e.getMessage());
+                default ->
+                    MyIO.println("Opçao invalida. Tente novamente.");
             }
         }
     }
 
-    private static void criarCapitulo() throws IOException {
-        MyIO.println("\n--- Criar Novo Capitulo ---");
-    
-        MyIO.print("Numero do Capitulo: ");
-        Short numero = Short.parseShort(MyIO.readString());
-        
+    private static void criarCapitulo(Capitulo capitulo) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile("dataset/capitulos.db", "rw");
 
-        if (capituloExiste(numero)) {
-            MyIO.println("Erro: Capítulo " + numero + " já existe no banco de dados.");
-            return;
-        }
-    
-        MyIO.print("Volume: ");
-        Short volume = Short.parseShort(MyIO.readString());
-    
-        MyIO.print("Nome: ");
-        String nome = MyIO.readString();
-    
-        MyIO.print("Titulo Original: ");
-        String tituloOriginal = MyIO.readString();
-    
-        MyIO.print("Titulo Ingles: ");
-        String tituloIngles = MyIO.readString();
-    
-        MyIO.print("Paginas: ");
-        Short paginas = Short.parseShort(MyIO.readString());
-    
-        MyIO.print("Data: ");
-        String data = MyIO.readString();
-    
-        MyIO.print("Episodio: ");
-        String episodio = MyIO.readString();
-    
-        String[] titulos = {tituloOriginal, tituloIngles};
-        Capitulo capitulo = new Capitulo(numero, volume, nome, titulos, paginas, data, episodio);
-    
-        byte[] ba = capitulo.toByteArray();
-    
-        try (FileOutputStream arq = new FileOutputStream(Capitulos, true);
-             DataOutputStream dos = new DataOutputStream(arq)) {
-            dos.writeInt(ba.length);
-            dos.write(ba);
-        }
-    
+        byte[] bytes = capitulo.toByteArray();
+
+        // Escrever o capítulo após sair do loop
+        AuxFuncoes.escreverCapitulo(bytes, raf.length());
+        AuxFuncoes.ReescreverUltimoIdInserido();
         MyIO.println("Capitulo salvo com sucesso!");
+        raf.close();
     }
 
-    private static void atualizarCapitulo() throws IOException {
-        MyIO.println("\n--- Atualizar Capitulo ---");
+    private static void lerCapitulo(int ID) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile("dataset/capitulos.db", "rw");
+        boolean achou = false;
 
-        MyIO.print("Numero do Capitulo para atualizar: ");
-        int numero = MyIO.readInt();
-        
+        raf.seek(4); // Garante que a leitura começa do início
 
-        if (!capituloExiste(numero)) {
-            MyIO.println("Erro: Capítulo " + numero + " não existe no banco de dados.");
-            return;
-        }
+        while (raf.getFilePointer() < raf.length()) {
+            byte valido = raf.readByte(); // Lê a lápide (byte de validade)
+            int tamanhoVetor = raf.readInt(); // Lê o tamanho do vetor de bytes
 
-        FileInputStream arq2 = new FileInputStream(Capitulos);
-        DataInputStream dis = new DataInputStream(arq2);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
+            if (valido == 1) { // Se o registro for válido
+                byte[] byteArray = new byte[tamanhoVetor];
+                raf.readFully(byteArray);
 
-        boolean encontrado = false;
-        while (dis.available() > 0) {
-            int len = dis.readInt();
-            byte[] ba = new byte[len];
-            dis.read(ba);
+                Capitulo capitulo = new Capitulo();
+                capitulo.fromByteArray(byteArray); // Converte os bytes para objeto
 
-            Capitulo capitulo = Capitulo.fromByteArray(ba);
-            if (capitulo.getNumeroCapitulo() == numero) {
-                encontrado = true;
-                MyIO.print("Novo nome: ");
-                capitulo.setNome(MyIO.readString());
-
-                MyIO.print("Novo Título Original: ");
-                capitulo.setTituloOriginal(MyIO.readString());
-
-                MyIO.print("Novo Título Ingles: ");
-                capitulo.setTituloIngles(MyIO.readString());
-
-                MyIO.print("Novo número de páginas: ");
-                capitulo.setPaginas(Short.parseShort(MyIO.readString()));
-
-                MyIO.print("Nova data: ");
-                capitulo.setData(MyIO.readString());
-
-                MyIO.print("Novo episódio: ");
-                capitulo.setEpisodio(MyIO.readString());
-            }
-
-            byte[] updatedBa = capitulo.toByteArray();
-            dos.writeInt(updatedBa.length);
-            dos.write(updatedBa);
-        }
-
-        if (!encontrado) {
-            MyIO.println("Capítulo não encontrado.");
-        } else {
-            try (FileOutputStream fos = new FileOutputStream(Capitulos);
-                 DataOutputStream dosFinal = new DataOutputStream(fos)) {
-                dosFinal.write(baos.toByteArray());
-                MyIO.println("Capítulo atualizado com sucesso.");
-            }
-        }
-    }
-
-    private static void deletarCapitulo() throws IOException {
-        MyIO.println("\n--- Deletar Capitulo ---");
-    
-        MyIO.print("Número do Capítulo para deletar: ");
-        Short numero = Short.parseShort(MyIO.readString());
-         
-        if (!capituloExiste(numero)) {
-            MyIO.println("Erro: Capítulo " + numero + " não existe no banco de dados.");
-            return;
-        }
-    
-        try (FileInputStream arq2 = new FileInputStream(Capitulos);
-             DataInputStream dis = new DataInputStream(arq2);
-             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             DataOutputStream dos = new DataOutputStream(baos)) {
-    
-            boolean encontrado = false;
-    
-            while (dis.available() > 0) {
-                // Verifica se há dados suficientes para ler o tamanho do capítulo
-                if (dis.available() < 4) {  // Se houver menos de 4 bytes restantes, não é possível ler um int
-                    MyIO.println("ERRO: Dados insuficientes para ler o tamanho do capítulo.");
+                if (capitulo.getId() == ID) {
+                    achou = true;
+                    MyIO.println(capitulo.toString()); // Exibe o capítulo encontrado
                     break;
-                }
-    
-                int len = dis.readInt();
-                MyIO.println("Lendo capítulo com tamanho: " + len);
-    
-                if (len > dis.available()) {
-                    MyIO.println("ERRO: Tamanho do capítulo maior que os bytes disponíveis.");
-                    break;
-                }
-    
-                byte[] ba = new byte[len];
-                dis.read(ba);
-    
-                Capitulo capitulo = Capitulo.fromByteArray(ba);
-                if (capitulo.getNumeroCapitulo() != numero) {
-                    // Se o capítulo não for o que queremos deletar, escreve ele no novo arquivo
-                    byte[] updatedBa = capitulo.toByteArray();
-                    dos.writeInt(updatedBa.length);
-                    dos.write(updatedBa);
-                } else {
-                    encontrado = true;
-                }
-            }
-    
-            if (encontrado) {
-                // Se o capítulo foi encontrado, escreve os capítulos restantes de volta no arquivo
-                try (FileOutputStream fos = new FileOutputStream(Capitulos);
-                     DataOutputStream dosFinal = new DataOutputStream(fos)) {
-                    dosFinal.write(baos.toByteArray());
-                    MyIO.println("Capítulo deletado com sucesso.");
                 }
             } else {
-                MyIO.println("Capítulo não encontrado.");
+                // Se o registro for inválido, pula os bytes correspondentes
+                raf.skipBytes(tamanhoVetor);
             }
         }
-    }
-    
-    private static boolean capituloExiste(int numeroCapitulo) throws IOException {
-        File arquivo = new File(Capitulos);
-        if (!arquivo.exists()) {
-            return false; // Se o arquivo não existe, o capítulo não pode existir
+
+        if (!achou) {
+            MyIO.println("Nao encontrado");
         }
-    
-        try (FileInputStream arq = new FileInputStream(arquivo);
-             DataInputStream dis = new DataInputStream(arq)) {
-            while (dis.available() > 0) {
-                int tamanho = dis.readInt(); // Lê o tamanho do próximo capítulo
-                byte[] ba = new byte[tamanho];
-                dis.read(ba); // Lê os bytes do capítulo
-    
-                // Converter os bytes para um objeto Capitulo e verificar o número
-                Capitulo capitulo = Capitulo.fromByteArray(ba);
-                if (capitulo.getNumeroCapitulo() == numeroCapitulo) {
-                    return true; // O capítulo já existe
+
+        raf.close(); // Fecha o arquivo após a leitura
+    }
+
+    private static void lerCapitulos(int[] ids) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile("dataset/capitulos.db", "rw");
+
+
+        raf.seek(4); // Garante que começamos do início do arquivo
+
+        while (raf.getFilePointer() < raf.length()) { // Continua enquanto houver dados no arquivo
+
+            byte valido = raf.readByte(); // Lê o byte de validade (lápide)
+            int tamanhoVetor = raf.readInt(); // Lê o tamanho do vetor (4 bytes)
+
+            if (valido == 1) { // Se o registro for válido
+                byte[] byteArray = new byte[tamanhoVetor];
+                raf.readFully(byteArray);
+
+                Capitulo capitulo = new Capitulo();
+                capitulo.fromByteArray(byteArray); // Preenche o objeto Capitulo
+
+                for (int id : ids) {
+                    if (capitulo.getId() == id) {
+                        MyIO.println(capitulo.toString()); // Exibe o capítulo encontrado
+                    }
                 }
+
+            } else {
+                // Pula os bytes do vetor caso seja inválido
+                raf.skipBytes(tamanhoVetor);
+            }
+            
+        }
+
+
+
+        raf.close();
+    }
+
+    private static void atualizarCapitulo(int ID) throws IOException {
+        RandomAccessFile RAF = new RandomAccessFile(BD, "rw");
+        RAF.seek(4); // Pula o cabeçalho
+    
+        while (RAF.getFilePointer() < RAF.length()) {
+            long posicao = RAF.getFilePointer();
+            byte valido = RAF.readByte(); // Lê o byte de validade
+    
+            int tamanhoVetor = RAF.readInt(); // Lê o tamanho do vetor
+    
+            if (valido != 1) { // Se for um capítulo inválido, apenas pula os bytes do registro
+                RAF.skipBytes(tamanhoVetor);
+                continue;
+            }
+    
+            byte[] byteArray = new byte[tamanhoVetor];
+            RAF.readFully(byteArray);
+    
+            Capitulo capitulo = new Capitulo();
+            capitulo.fromByteArray(byteArray);
+    
+            if (capitulo.getId() == ID) {
+                Capitulo novoCapitulo = AuxFuncoes.CriarNovoCapitulo();
+               novoCapitulo.setId(ID);
+
+                byte[] novoByteArray = novoCapitulo.toByteArray();
+    
+                if (novoByteArray.length <= tamanhoVetor) {
+                    MyIO.println("Atualização coube no espaço reservado");
+                
+                   
+                    RAF.seek(posicao + 5); // Pula o byte de validade e o int de tamanho
+                    RAF.write(novoByteArray); // Escreve os novos dados
+    
+                    RAF.write(new byte[tamanhoVetor - novoByteArray.length]);
+                } else {
+                    MyIO.println("Atualizaçao nao coube no espaco reservado, inserido no fim do arquivo");
+
+                    RAF.seek(posicao);
+                    RAF.writeByte(0);
+                    AuxFuncoes.escreverCapitulo(novoByteArray, RAF.length());
+                }
+    
+                MyIO.println("Capitulo atualizado com sucesso.");
+                RAF.close();
+                return;
             }
         }
-        return false; // Não encontrou o capítulo
+    
+        MyIO.println("Capitulo nao encontrado.");
+        RAF.close();
     }
+    
+    
 
-    public static void lerCapitulos() throws IOException {
+    private static void deletarCapitulo(int ID) throws IOException {
+        RandomAccessFile RAF = new RandomAccessFile(BD, "rw");
 
-        MyIO.println("\n--- Menu Leitura ---");
-        MyIO.println("1. Imprimir pelo número do Capitulo");
-        MyIO.println("2. Imprimir todos os Capitulos");
+        // Lê os primeiros 4 bytes do arquivo
+        RAF.seek(0);
+        int primeiroValor = RAF.readInt();
 
-        MyIO.print("Escolha uma opção: ");
-        int opcao = MyIO.readInt();
+        // Se o registro for válido ele coloca a lapide e marca como invalido
+        while (RAF.getFilePointer() < RAF.length()) {
+            long ponteiro = RAF.getFilePointer();
+            if (RAF.readByte() == 1) {
+                int tamanhoVetor = RAF.readInt();
+                byte[] byteArray = new byte[tamanhoVetor];
+                RAF.readFully(byteArray);
 
-        if (opcao == 1) {
-            MyIO.println("Escreva o número do Capitulo");
-            int op = MyIO.readInt();
-            lerCapituloPorCapitulo(op);
-        } else if (opcao == 2) {
-            imprimirTodosCapitulos();
-        }
-    }
+                Capitulo capitulo = new Capitulo();
+                capitulo.fromByteArray(byteArray);
 
-public static void imprimirTodosCapitulos() throws IOException {
+                if (capitulo.getId() == ID) {
+                    RAF.seek(ponteiro);
+                    RAF.writeByte(0); // Marca como inválido
+                    MyIO.println("Capitulo " + ID + " deletado.");
+                    // Se o ID deletado for igual aos primeiros 4 bytes, decrementa 1
+                    if (ID == primeiroValor) {
+                        RAF.seek(0);
+                        RAF.writeInt(primeiroValor - 1);
+                    }
 
-    File binario = new File("capitulos.db");
-
-    try (FileInputStream arq2 = new FileInputStream(binario);
-            DataInputStream dis = new DataInputStream(arq2)) {
-
-        MyIO.println("\n--- Lista de Todos os Capitulos ---");
-
-        // Percorre todos os capítulos no arquivo binário
-        while (dis.available() > 0) {
-            // Lê o tamanho do vetor (primeiro valor de cada registro)
-            int len = dis.readInt();
-
-            // Lê o vetor (capítulo) como um array de bytes com o tamanho informado por 'len'
-            byte[] ba = new byte[len];
-            dis.read(ba); // Preenche o array de bytes com os dados do capítulo
-
-            // Converte os bytes lidos em um objeto Capítulo
-            Capitulo capitulo = Capitulo.fromByteArray(ba);
-
-            // Imprime as informações do capítulo
-            MyIO.println("Capítulo encontrado: " + capitulo.toString());
-        }
-
-    } catch (IOException e) {
-        MyIO.println("Erro ao ler o arquivo binário: " + e.getMessage());
-    }
-}
-
-public static void lerCapituloPorCapitulo(int numeroRegistro) throws IOException {
-    File binario = new File("capitulos.db");
-
-    try (FileInputStream arq2 = new FileInputStream(binario);
-            DataInputStream dis = new DataInputStream(arq2)) {
-
-        MyIO.println("\n--- Leitura do Capítulo por ID ---");
-
-        // Percorrendo os capítulos até o ID desejado
-        while (dis.available() > 0) {
-            // Lê o tamanho do vetor (primeiro valor do registro)
-            int len = dis.readInt();
-
-            // Lê o vetor como um array de bytes com o tamanho informado por 'len'
-            byte[] ba = new byte[len];
-            dis.read(ba); // Preenche o array de bytes com os dados do capítulo
-
-            // Converte os bytes lidos em um objeto Capítulo
-            Capitulo capitulo = Capitulo.fromByteArray(ba);
-
-            // Verifica se o ID do capítulo corresponde ao número de registro
-            if (capitulo.getNumeroCapitulo() == numeroRegistro) {
-                MyIO.println("Capítulo encontrado: " + capitulo);
-                return; // Encontrado, encerra a busca
+                    RAF.close();
+                    return;
+                }
+            } else {
+                RAF.skipBytes(RAF.readInt()); // Pula o registro inválido
             }
         }
 
-        MyIO.println("Capítulo com ID " + numeroRegistro + " não encontrado.");
+        MyIO.println("Capitulo nao encontrado.");
+        RAF.close();
     }
-}
 
 }
