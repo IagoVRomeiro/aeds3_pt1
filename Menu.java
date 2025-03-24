@@ -52,7 +52,6 @@ public class Menu {
 
     private static void lerCapitulo(int ID) throws IOException {
         RandomAccessFile raf = new RandomAccessFile("dataset/capitulos.db", "rw");
-        boolean achou = false;
 
         raf.seek(4);
 
@@ -68,7 +67,6 @@ public class Menu {
                 capitulo.fromByteArray(byteArray);
 
                 if (capitulo.getId() == ID) {
-                    achou = true;
                     MyIO.println(capitulo.toString());
                     break;
                 }
@@ -77,9 +75,6 @@ public class Menu {
             }
         }
 
-        if (!achou) {
-            MyIO.println("Não encontrado");
-        }
 
         raf.close();
     }
