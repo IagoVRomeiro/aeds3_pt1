@@ -6,7 +6,7 @@ import java.util.*;
 
 public class AuxFuncoes {
 
-    // Separa o texto CSV corretamente tratando campos entre aspas
+    // Separa o texto CSV
     public static String[] separarPorVirgula(String texto) {
         String[] campos = texto.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
     
@@ -18,7 +18,7 @@ public class AuxFuncoes {
     }
     
 
-    // Converte a data de um formato para outro
+    // Converte a data
     public static String formatarData(String data) throws ParseException {
         SimpleDateFormat formatoEntrada = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
         SimpleDateFormat formatoSaida = new SimpleDateFormat("dd/MM/yyyy");
@@ -52,7 +52,7 @@ public class AuxFuncoes {
     }
 
     // Reescreve o último ID inserido no arquivo
-    public static void ReescreverUltimoIdInserido() throws IOException {
+    public static void IncrementaUltimoIdInserido() throws IOException {
         RandomAccessFile RAF = new RandomAccessFile("dataset/capitulos.db", "rw");
 
         RAF.seek(0);  

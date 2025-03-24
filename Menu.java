@@ -1,3 +1,4 @@
+
 import java.io.*;
 
 public class Menu {
@@ -18,16 +19,22 @@ public class Menu {
             int opcao = MyIO.readInt();
 
             switch (opcao) {
-                case 1 -> criarCapitulo(AuxFuncoes.CriarNovoCapitulo());
-                case 2 -> lerCapitulo(AuxFuncoes.qualID());
-                case 3 -> lerCapitulos(AuxFuncoes.PerguntaQTD_ID());
-                case 4 -> atualizarCapitulo(AuxFuncoes.qualID());
-                case 5 -> deletarCapitulo(AuxFuncoes.qualID());
+                case 1 ->
+                    criarCapitulo(AuxFuncoes.CriarNovoCapitulo());
+                case 2 ->
+                    lerCapitulo(AuxFuncoes.qualID());
+                case 3 ->
+                    lerCapitulos(AuxFuncoes.PerguntaQTD_ID());
+                case 4 ->
+                    atualizarCapitulo(AuxFuncoes.qualID());
+                case 5 ->
+                    deletarCapitulo(AuxFuncoes.qualID());
                 case 6 -> {
                     MyIO.println("Saindo...");
                     System.exit(0);
                 }
-                default -> MyIO.println("Opção inválida. Tente novamente.");
+                default ->
+                    MyIO.println("Opção inválida. Tente novamente.");
             }
         }
     }
@@ -38,7 +45,7 @@ public class Menu {
         byte[] bytes = capitulo.toByteArray();
 
         AuxFuncoes.escreverCapitulo(bytes, raf.length());
-        AuxFuncoes.ReescreverUltimoIdInserido();
+        AuxFuncoes.IncrementaUltimoIdInserido();
         MyIO.println("Capítulo salvo com sucesso!");
         raf.close();
     }
@@ -115,61 +122,59 @@ public class Menu {
             byte valido = RAF.readByte();
             int tamanhoVetor = RAF.readInt();
 
-            if (valido != 1) {
-                RAF.skipBytes(tamanhoVetor);
-                continue;
-            }
+            if (valido == 1) {
 
-            byte[] byteArray = new byte[tamanhoVetor];
-            RAF.readFully(byteArray);
+                byte[] byteArray = new byte[tamanhoVetor];
+                RAF.readFully(byteArray);
+                Capitulo capitulo = new Capitulo();
+                capitulo.fromByteArray(byteArray);
 
-            Capitulo capitulo = new Capitulo();
-            capitulo.fromByteArray(byteArray);
+                if (capitulo.getId() == ID) {
+                    Capitulo novoCapitulo = AuxFuncoes.CriarNovoCapitulo();
+                    novoCapitulo.setId(ID);
 
-            if (capitulo.getId() == ID) {
-                Capitulo novoCapitulo = AuxFuncoes.CriarNovoCapitulo();
-                novoCapitulo.setId(ID);
+                    byte[] novoByteArray = novoCapitulo.toByteArray();
 
-                byte[] novoByteArray = novoCapitulo.toByteArray();
+                    if (novoByteArray.length <= tamanhoVetor) {
+                        MyIO.println("Atualizacao coube no espaço reservado");
+                        RAF.seek(posicao + 5);
+                        RAF.write(novoByteArray);
 
-                if (novoByteArray.length <= tamanhoVetor) {
-                    MyIO.println("Atualização coube no espaço reservado");
-                    RAF.seek(posicao + 5);
-                    RAF.write(novoByteArray);
+                        RAF.write(new byte[tamanhoVetor - novoByteArray.length]);
+                        break;
+                    } else {
+                        MyIO.println("Atualizacao nao coube no espaço reservado, inserido no fim do arquivo");
 
-                    RAF.write(new byte[tamanhoVetor - novoByteArray.length]);
-                } else {
-                    MyIO.println("Atualização não coube no espaço reservado, inserido no fim do arquivo");
+                        RAF.seek(posicao);
+                        RAF.writeByte(0);
+                        AuxFuncoes.escreverCapitulo(novoByteArray, RAF.length());
+                        break;
+                    }
 
-                    RAF.seek(posicao);
-                    RAF.writeByte(0);
-                    AuxFuncoes.escreverCapitulo(novoByteArray, RAF.length());
                 }
 
-                MyIO.println("Capítulo atualizado com sucesso.");
-                RAF.close();
-                return;
+            } else {
+                RAF.skipBytes(tamanhoVetor);
             }
-        }
 
-        MyIO.println("Capítulo não encontrado.");
+        }
         RAF.close();
     }
-
 
     private static void deletarCapitulo(int ID) throws IOException {
         RandomAccessFile RAF = new RandomAccessFile(BD, "rw");
 
         RAF.seek(0);
         int UltimoId = RAF.readInt();
+        byte valido = RAF.readByte();
+        int tamanhoVetor = RAF.readInt();
 
         while (RAF.getFilePointer() < RAF.length()) {
             long ponteiro = RAF.getFilePointer();
-            if (RAF.readByte() == 1) {
-                int tamanhoVetor = RAF.readInt();
+            if (valido == 1) {
+
                 byte[] byteArray = new byte[tamanhoVetor];
                 RAF.readFully(byteArray);
-
                 Capitulo capitulo = new Capitulo();
                 capitulo.fromByteArray(byteArray);
 
@@ -184,10 +189,10 @@ public class Menu {
                     }
 
                     RAF.close();
-                    return;
+
                 }
             } else {
-                RAF.skipBytes(RAF.readInt());
+                RAF.skipBytes(tamanhoVetor);
             }
         }
 

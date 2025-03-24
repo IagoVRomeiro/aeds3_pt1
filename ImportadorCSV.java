@@ -35,7 +35,7 @@ public class ImportadorCSV {
 
             // funções para escrever no arquivo binário
             AuxFuncoes.escreverCapitulo(dataBytes, raf.length());
-            AuxFuncoes.ReescreverUltimoIdInserido();
+            AuxFuncoes.IncrementaUltimoIdInserido();
         }
 
         // Fecha os recursos abertos
